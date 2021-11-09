@@ -1,25 +1,32 @@
 var express = require("express");
 var router = express.Router();
+var dotenv = require("dotenv");
+var mongo = require("mongodb");
 
-router.post("/order", async function (req, res, next) {
+dotenv.config();
+const mongoClient = mongo.MongoClient;
+const url = process.env.MONGODB;
+
+router.post("/", async function (req, res) {
 	try {
 		let client = await mongoClient.connect(url);
 
 		let db = client.db("amazon");
 
-		let data = await db.collection("users").insertOne(req.body);
+		let response = await db.collection("users").insertOne(req.body);
 
 		await client.close();
 
 		res.json({
-			message: "User Registered",
-			id: data._id,
+			message: "Order Placed",
 			code: true,
+			response,
 		});
 	} catch (error) {
 		res.status(500).json({
 			message: "Something went wrong",
 			code: false,
+			response,
 		});
 	}
 });

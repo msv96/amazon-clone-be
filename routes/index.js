@@ -7,7 +7,7 @@ dotenv.config();
 const mongoClient = mongo.MongoClient;
 const url = process.env.MONGODB;
 
-router.get("/", async function (req, res, next) {
+router.get("/", async function (req, res) {
 	try {
 		let client = await mongoClient.connect(url);
 
@@ -15,7 +15,7 @@ router.get("/", async function (req, res, next) {
 
 		let data = await db.collection("products").find().toArray();
 
-		client.close();
+		await client.close();
 
 		res.json(data);
 	} catch (error) {
