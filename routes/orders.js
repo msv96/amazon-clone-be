@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var dotenv = require("dotenv");
 var mongo = require("mongodb");
+const { ObjectID } = require("bson");
 
 dotenv.config();
 const mongoClient = mongo.MongoClient;
@@ -15,6 +16,19 @@ router.post("/", async function (req, res) {
 
 		let response = await db.collection("users").insertOne(req.body);
 
+		for await (let item of req.body.Data) {
+			let d = await db
+				.collection("products")
+				.findOne({ _id: ObjectID(item._id) });
+			let d1 = d.qty - item.userqty;
+			await db
+				.collection("products")
+				.findOneAndUpdate(
+					{ _id: ObjectID(item._id) },
+					{ $set: { qty: d1 } }
+				);
+		}
+
 		await client.close();
 
 		res.json({
@@ -26,7 +40,6 @@ router.post("/", async function (req, res) {
 		res.status(500).json({
 			message: "Something went wrong",
 			code: false,
-			response,
 		});
 	}
 });
